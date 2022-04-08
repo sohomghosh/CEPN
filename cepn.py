@@ -606,6 +606,7 @@ def write_blind_res(data, id_to_sent, preds, outfile):
             pred_triples, all_pred_triples = get_pred_triples(preds[0][i], preds[1][i], preds[2][i], preds[3][i],
                                                               None, data[i].BertTokens, data[i].SrcWords,
                                                               data[i].TokenMap, data[i].GTLen)
+        ''' # Changed by SOHOM
         if len(pred_triples) < data[i].TrgLen:
             less_cnt += 1
         if len(pred_triples) > data[i].TrgLen:
@@ -613,11 +614,11 @@ def write_blind_res(data, id_to_sent, preds, outfile):
         if data[i].TrgLen == 1:
             cause = pred_triples[0][0]
             effect = pred_triples[0][1]
-            out_line = index + '; ' + sent + '; ' + cause + '; ' + effect + '; ' + str(index_for_sent) +'\n' # Changed by SOHOM
+            out_line = str(index) + '; ' + sent + '; ' + cause + '; ' + effect + '; ' + str(index_for_sent) +'\n' # Changed by SOHOM
             writer.write(out_line)
         else:
             for j in range(data[i].TrgLen):
-                cur_index = index + '.' + str(j + 1)
+                cur_index = str(index) + '.' + str(j + 1)
                 cause = ''
                 effect = ''
                 if j < len(pred_triples):
@@ -627,6 +628,11 @@ def write_blind_res(data, id_to_sent, preds, outfile):
                 writer.write(out_line)
     custom_print('Less pair extracted: ', less_cnt)
     custom_print('More pair extracted: ', more_cnt)
+    '''
+        cause = pred_triples[0][0] # Changed by SOHOM
+        effect = pred_triples[0][1] # Changed by SOHOM
+        out_line = str(index_for_sent) + '; ' + sent + '; ' + cause + '; ' + effect + '\n'#+ ',' + str(index_for_sent) +'\n' # Changed by SOHOM
+        writer.write(out_line) # Changed by SOHOM
     writer.close()
 
 
@@ -1643,10 +1649,10 @@ if __name__ == "__main__":
         test_preds = predict(test_data, best_model, model_name)
         #test_f1 = get_F1(test_data, test_preds) # Changed by SOHOM
         #write_test_res(test_data, test_preds, os.path.join(trg_data_folder, 'test_out.json')) # Changed by SOHOM
-        test_blind_df = pd.read_csv(os.path.join(src_data_folder, test_file_csv), sep = ';', header =0) # Changed by SOHOM
+        test_blind_df = pd.read_csv(os.path.join(src_data_folder, test_file_csv), sep = '; ', header =0) # Changed by SOHOM
         test_blind_df.columns = ['Index', 'Text'] # Changed by SOHOM
-        id_to_sent = dict(zip([i.strip() for i in test_blind_df.Index], [j.strip() for j in test_blind_df.Text])) # Changed by SOHOM
-        write_blind_res(test_data, id_to_sent, test_preds, os.path.join(trg_data_folder, 'test_out.json')) # Changed by SOHOM
+        id_to_sent = dict(zip(test_blind_df.Index, test_blind_df.Text)) # Changed by SOHOM
+        write_blind_res(test_data, id_to_sent, test_preds, os.path.join(trg_data_folder, 'task2.csv')) # Changed by SOHOM
 
         logger.close()
 

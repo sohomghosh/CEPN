@@ -11,7 +11,6 @@ from nltk.tokenize import sent_tokenize
 import argparse
 import random
 import pandas as pd
-import pyconll
 
 
 def generate_bert_json(in_file, out_file, bert_tokenizer_name):
