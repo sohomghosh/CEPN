@@ -1,7 +1,6 @@
 import sys
 import os
 import numpy as np
-import pandas as pd
 import random
 
 from collections import OrderedDict
@@ -39,10 +38,8 @@ def get_sample(uid, data, datatype):
     org_sent = data['org_sent'].strip()
     bert_sent = data['bert_sent'].strip()
     token_map = data['bert_to_org_token_map']
-    if 'original_causality' in data.keys():  # Changed by SOHOM
-        gt_causality = data['original_causality']  # Changed by SOHOM
-    if 'bert_pointers' in data.keys():  # Changed by SOHOM
-        trg_ptrs = data['bert_pointers']  # Changed by SOHOM
+    gt_causality = data['original_causality']
+    trg_ptrs = data['bert_pointers']
     global max_cardinality
     global max_span
 
@@ -56,18 +53,17 @@ def get_sample(uid, data, datatype):
     if 'bert_boundary_tags' in data:
         boundary_tags = ['[unused0]'] + data['bert_boundary_tags']
 
-    if datatype in [1,2]: # Changed by SOHOM
-        trg_pointers = []
-        for ptr_str in trg_ptrs:
-            elements = ptr_str.strip().split(' ')
-            trg_pointers.append((int(elements[0]) + 1, int(elements[1]) + 1,
-                                int(elements[2]) + 1, int(elements[3]) + 1))
-            span_len = int(elements[1]) - int(elements[0]) + 1
-            effect_len = int(elements[3]) - int(elements[2]) + 1
-            if effect_len > span_len:
-                span_len = effect_len
-            if datatype in [1, 2] and span_len > max_span:
-                max_span = span_len
+    trg_pointers = []
+    for ptr_str in trg_ptrs:
+        elements = ptr_str.strip().split(' ')
+        trg_pointers.append((int(elements[0]) + 1, int(elements[1]) + 1,
+                             int(elements[2]) + 1, int(elements[3]) + 1))
+        span_len = int(elements[1]) - int(elements[0]) + 1
+        effect_len = int(elements[3]) - int(elements[2]) + 1
+        if effect_len > span_len:
+            span_len = effect_len
+        if datatype in [1, 2] and span_len > max_span:
+            max_span = span_len
 
     if datatype == 1:
         # trg_pointers = sorted(trg_pointers, key=lambda element: (element[0], element[2]))
@@ -77,18 +73,11 @@ def get_sample(uid, data, datatype):
     if datatype == 1 and (len(bert_tokens) > max_src_len or len(trg_pointers) > max_trg_len):
         return False, None
 
-    if datatype in [1,2]: # Changed by SOHOM
-        sample = Sample(Id=uid, SrcLen=len(org_tokens), SrcWords=org_tokens,
-                        BertLen=len(bert_tokens), BertTokens=bert_tokens, POSTags=pos_tags,
-                        BoundaryTags=boundary_tags,
-                        TokenMap=token_map, GT=gt_causality, GTLen=len(gt_causality),
-                        TrgLen=len(trg_pointers), TrgPointers=trg_pointers)
-    else: # Changed by SOHOM
-        sample = Sample(Id=uid, SrcLen=len(org_tokens), SrcWords=org_tokens,
-                        BertLen=len(bert_tokens), BertTokens=bert_tokens, POSTags=pos_tags,
-                        BoundaryTags=boundary_tags,
-                        TokenMap=token_map, GT='', GTLen=0,
-                        TrgLen=0, TrgPointers=[]) # Changed by SOHOM
+    sample = Sample(Id=uid, SrcLen=len(org_tokens), SrcWords=org_tokens,
+                    BertLen=len(bert_tokens), BertTokens=bert_tokens, POSTags=pos_tags,
+                    BoundaryTags=boundary_tags,
+                    TokenMap=token_map, GT=gt_causality, GTLen=len(gt_causality),
+                    TrgLen=len(trg_pointers), TrgPointers=trg_pointers)
     return True, sample
 
 
@@ -595,9 +584,9 @@ def write_blind_res(data, id_to_sent, preds, outfile):
     writer.write('Index; Text; Cause; Effect' + '\n')
     less_cnt = 0
     more_cnt = 0
-    for i,index_for_sent in zip(range(0, len(data)), id_to_sent.keys()): # Changed by SOHOM
+    for i in range(0, len(data)):
         index = data[i].Id
-        sent = id_to_sent[index_for_sent] # Changed by SOHOM
+        sent = id_to_sent[index]
         if use_cardinality:
             pred_triples, all_pred_triples = get_pred_triples(preds[0][i], preds[1][i], preds[2][i], preds[3][i],
                                                               preds[4][i], data[i].BertTokens, data[i].SrcWords,
@@ -613,7 +602,7 @@ def write_blind_res(data, id_to_sent, preds, outfile):
         if data[i].TrgLen == 1:
             cause = pred_triples[0][0]
             effect = pred_triples[0][1]
-            out_line = index + '; ' + sent + '; ' + cause + '; ' + effect + '; ' + str(index_for_sent) +'\n' # Changed by SOHOM
+            out_line = index + '; ' + sent + '; ' + cause + '; ' + effect + '\n'
             writer.write(out_line)
         else:
             for j in range(data[i].TrgLen):
@@ -623,7 +612,7 @@ def write_blind_res(data, id_to_sent, preds, outfile):
                 if j < len(pred_triples):
                     cause = pred_triples[j][0]
                     effect = pred_triples[j][1]
-                out_line = cur_index + '; ' + sent + '; ' + cause + '; ' + effect + '; ' + str(index_for_sent) +'\n' # Changed by SOHOM
+                out_line = cur_index + '; ' + sent + '; ' + cause + '; ' + effect + '\n'
                 writer.write(out_line)
     custom_print('Less pair extracted: ', less_cnt)
     custom_print('More pair extracted: ', more_cnt)
@@ -1407,13 +1396,13 @@ def train_model(model_id, train_samples, dev_samples, test_samples, best_model_f
                 custom_print('model saved......')
                 best_dev_acc = dev_acc
                 torch.save(model.state_dict(), best_model_file)
-        '''# Changed by SOHOM
+
         if test_samples is not None:
             custom_print('\nTest Results\n')
             set_random_seeds(random_seed)
             test_preds = predict(test_samples, model, model_id)
             test_acc = get_F1(test_samples, test_preds)
-        '''
+
         custom_print('\n\n')
         # if epoch_idx + 1 - best_epoch_idx >= early_stop_cnt:
         #     break
@@ -1550,7 +1539,6 @@ if __name__ == "__main__":
     src_data_folder = config[dataset_name]['data_dir']
     train_file_name = config[dataset_name]['train_file']
     test_file_name = config[dataset_name]['test_file']
-    test_file_csv = config[dataset_name]['test_file_csv'] # Changed by SOHOM
     batch_size = int(config[dataset_name]['batch_size'])
     num_epoch = int(config[dataset_name]['num_epoch'])
     drop_rate = float(config[dataset_name]['drop_rate'])
@@ -1625,7 +1613,7 @@ if __name__ == "__main__":
         custom_print('Max span:', max_span)
         model_file_name = os.path.join(trg_data_folder, 'model.h5py')
 
-        train_model(model_name, train_data, dev_data, None, model_file_name) # Changed by SOHOM # Not passing test_data as we need to score on it, it is blind, we don't have the labels
+        train_model(model_name, train_data, dev_data, test_data, model_file_name)
         custom_print("\n\nPrediction......")
         best_model = get_model(model_name)
         if torch.cuda.is_available():
@@ -1637,15 +1625,12 @@ if __name__ == "__main__":
         custom_print('\nDev Results\n')
         dev_preds = predict(dev_data, best_model, model_name)
         dev_f1 = get_F1(dev_data, dev_preds)
-        # write_test_res(dev_data, dev_preds, os.path.join(trg_data_folder, 'dev_out.json')) # Changed by SOHOM
+        write_test_res(dev_data, dev_preds, os.path.join(trg_data_folder, 'dev_out.json'))
 
         custom_print('\nTest Results\n')
         test_preds = predict(test_data, best_model, model_name)
-        #test_f1 = get_F1(test_data, test_preds) # Changed by SOHOM
-        #write_test_res(test_data, test_preds, os.path.join(trg_data_folder, 'test_out.json')) # Changed by SOHOM
-        test_blind_df = pd.read_csv(os.path.join(trg_data_folder, test_file_csv), sep = '; ', header =0) # Changed by SOHOM
-        id_to_sent =  dict(zip(test_blind_df.Index, test_blind_df.Text)) # Changed by SOHOM sent = id_to_sent[index]
-        write_blind_res(test_data, id_to_sent, test_preds, os.path.join(trg_data_folder, 'test_out.json')) # Changed by SOHOM
+        test_f1 = get_F1(test_data, test_preds)
+        write_test_res(test_data, test_preds, os.path.join(trg_data_folder, 'test_out.json'))
 
         logger.close()
 
@@ -1701,7 +1686,7 @@ if __name__ == "__main__":
             custom_print('\nValidation Results\n')
             dev_preds = predict(dev_data, best_model, model_name)
             # dev_f1 = get_F1(dev_data, dev_preds)
-            # write_test_res(dev_data, dev_preds, os.path.join(trg_data_folder, 'dev_fold_' + str(i+1) + '_out.json')) # Changed by SOHOM
+            write_test_res(dev_data, dev_preds, os.path.join(trg_data_folder, 'dev_fold_' + str(i+1) + '_out.json'))
             custom_print('\n\n')
 
             tk_p, tk_r, tk_f1, em_f1 = get_fincausal_score(os.path.join(trg_data_folder,

@@ -84,12 +84,14 @@ def generate_bert_json(in_file, out_file, bert_tokenizer_name):
             bert_bound_tags = bert_bound_tags[:len(bert_tokens)]
         assert len(bert_tokens) == len(bert_bound_tags)
         bert_pointers = []
+        ''' # Changed by SOHOM
         pointers = data['pointers']
         for p in pointers:
             ap_s, ap_e, op_s, op_e = p.split(' ')
             new_p = [str(token_map[int(ap_s)][0]), str(token_map[int(ap_e)][0]),
                      str(token_map[int(op_s)][0]), str(token_map[int(op_e)][0])]
             bert_pointers.append(' '.join(new_p))
+        '''    
         bert_sent = ' '.join(bert_tokens)
         trg_data = OrderedDict()
         trg_data['org_sent'] = text
@@ -98,26 +100,27 @@ def generate_bert_json(in_file, out_file, bert_tokenizer_name):
         trg_data['bert_boundary_tags'] = bert_bound_tags
         trg_data['pos_tags'] = bert_pos_seq
         trg_data['bert_to_org_token_map'] = rev_token_map
-        trg_data['original_causality'] = data['original_causality']
-        trg_data['modified_causality'] = data['modified_causality']
-        trg_data['bert_pointers'] = bert_pointers
+        #trg_data['original_causality'] = data['original_causality'] # Changed by SOHOM
+        #trg_data['modified_causality'] = data['modified_causality'] # Changed by SOHOM
+        #trg_data['bert_pointers'] = bert_pointers # Changed by SOHOM
         writer.write(json.dumps(trg_data) + '\n')
     writer.close()
 
 
 def generate_train_json(in_file, out_file):
-    lines = open(in_file).readlines()
+    lines = open(in_file).readlines()[1:]# Changed by SOHOM - Removing the first line as it has headers
     print(len(lines))
     index_dct = OrderedDict()
     cnt = 0
+    writer = open(out_file, 'w') # Changed by SOHOM
     for line in lines:
         line = line.strip()
         parts = line.split(';') #SOHOM: To be changed to ',' for our piece
         sent = parts[1].strip()
-        cause = parts[2].strip()
-        effect = parts[3].strip()
-        cause_start = int(float(parts[6].strip()))
-        effect_start = int(float(parts[8].strip()))
+        #cause = parts[2].strip() # Changed by SOHOM
+        #effect = parts[3].strip() # Changed by SOHOM
+        #cause_start = int(float(parts[6].strip())) # Changed by SOHOM
+        #effect_start = int(float(parts[8].strip())) # Changed by SOHOM
 
         char_word_idx = OrderedDict()
         tokens = sent.split(' ')
@@ -127,22 +130,28 @@ def generate_train_json(in_file, out_file):
             char_word_idx[char_idx] = word_idx
             word_idx += 1
             char_idx += len(tok) + 1
-        cstart = char_word_idx[cause_start]
-        cend = cstart + len(cause.split(' ')) - 1
-        estart = char_word_idx[effect_start]
-        eend = estart + len(effect.split(' ')) - 1
+        #cstart = char_word_idx[cause_start] # Changed by SOHOM
+        #cend = cstart + len(cause.split(' ')) - 1 # Changed by SOHOM
+        #estart = char_word_idx[effect_start] # Changed by SOHOM
+        #eend = estart + len(effect.split(' ')) - 1 # Changed by SOHOM
 
-        new_cause = ' '.join(tokens[cstart:cend+1])
-        new_effect = ' '.join(tokens[estart:eend+1])
+        #new_cause = ' '.join(tokens[cstart:cend+1]) # Changed by SOHOM
+        #new_effect = ' '.join(tokens[estart:eend+1])
+        ''' # Changed by SOHOM
         if sent not in index_dct:
             index_dct[sent] = [(cstart, cend, estart, eend, cause, effect, new_cause, new_effect)]
         else:
             index_dct[sent].append((cstart, cend, estart, eend, cause, effect, new_cause, new_effect))
+        '''    
+        data = OrderedDict()
+        data['sent'] = sent
+        writer.write(json.dumps(data) + '\n')
         cnt += 1
 
-    print(len(index_dct))
+    #print(len(index_dct)) # Changed by SOHOM
     print(cnt)
-    writer = open(out_file, 'w')
+    #writer = open(out_file, 'w') # Changed by SOHOM
+    ''' # Changed by SOHOM
     for key in index_dct:
         data = OrderedDict()
         data['sent'] = key
@@ -154,12 +163,15 @@ def generate_train_json(in_file, out_file):
             org_ce.append((tup[4], tup[5]))
             new_ce.append((tup[6], tup[7]))
             pointers.append(str(tup[0]) + ' ' + str(tup[1]) + ' ' + str(tup[2]) + ' ' + str(tup[3]))
+        
         # writer.write('Original:' + ' | '.join(org_ce) + '\n')
         data['original_causality'] = org_ce
         # writer.write('modified' + ' | '.join(new_ce) + '\n')
         data['modified_causality'] = new_ce
+        
         data['pointers'] = pointers
         writer.write(json.dumps(data) + '\n')
+    '''    
     writer.close()
 
 
