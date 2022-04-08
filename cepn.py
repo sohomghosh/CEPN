@@ -632,10 +632,10 @@ def write_blind_res(data, id_to_sent, preds, outfile):
         if len(pred_triples)==1:
             cause = pred_triples[0][0] # Changed by SOHOM
             effect = pred_triples[0][1] # Changed by SOHOM
-            out_line = str(index_for_sent).replace(';', '') + '; ' + sent.replace(';', '') + '; ' + cause.replace(';', '') + '; ' + effect.replace(';', '') + '\n'#+ ',' + str(index_for_sent) +'\n' # Changed by SOHOM
+            out_line = str(index_for_sent).replace(';', '') + '; ' + str(sent).replace(';', '') + '; ' + str(cause).replace(';', '') + '; ' + str(effect).replace(';', '') + '\n'#+ ',' + str(index_for_sent) +'\n' # Changed by SOHOM
             writer.write(out_line) # Changed by SOHOM
         else:
-            out_line = str(index_for_sent).replace(';', '') + '; ' + sent.replace(';', '') + '; ' + '' + '; ' + '' + '\n'#+ ',' + str(index_for_sent) +'\n' # Changed by SOHOM
+            out_line = str(index_for_sent).replace(';', '') + '; ' + str(sent).replace(';', '') + '; ' + '' + '; ' + '' + '\n'#+ ',' + str(index_for_sent) +'\n' # Changed by SOHOM
             writer.write(out_line) # Changed by SOHOM
     writer.close()
 
