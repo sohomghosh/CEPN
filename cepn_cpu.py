@@ -1135,13 +1135,13 @@ class Seq2SeqModel(nn.Module):
             else:
                 card_logits = torch.sigmoid(self.card_classifier(cls))
 
-        h0 = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, dec_hidden_size))).cuda()
-        c0 = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, dec_hidden_size))).cuda()
+        h0 = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, dec_hidden_size))).cpu()
+        c0 = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, dec_hidden_size))).cpu()
         dec_hid = (h0, c0)
         # dec_hid = (cls, cls)
 
-        prev_causes = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, 2 * pointer_net_hidden_size))).cuda()
-        prev_effects = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, 2 * pointer_net_hidden_size))).cuda()
+        prev_causes = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, 2 * pointer_net_hidden_size))).cpu()
+        prev_effects = autograd.Variable(torch.FloatTensor(torch.zeros(batch_len, 2 * pointer_net_hidden_size))).cpu()
 
         # prev_tuples = torch.cat((arg1, arg2), -1)
 
@@ -1212,7 +1212,7 @@ def set_random_seeds(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
     if n_gpu > 1:
-        torch.cuda.manual_seed_all(seed)
+        torch.cpu.manual_seed_all(seed)
 
 
 def predict(samples, model, model_id):
@@ -1246,12 +1246,12 @@ def predict(samples, model, model_id):
         src_chars_seq = torch.from_numpy(cur_samples_input['src_chars'].astype('long'))
         src_boundary_tags = torch.from_numpy(cur_samples_input['src_boundary_tags'].astype('long'))
 
-        src_words_seq = autograd.Variable(src_words_seq.cuda())
-        bert_words_mask = autograd.Variable(bert_words_mask.cuda())
-        src_words_mask = autograd.Variable(src_words_mask.cuda())
-        src_pos_tags = autograd.Variable(src_pos_tags.cuda())
-        src_chars_seq = autograd.Variable(src_chars_seq.cuda())
-        src_boundary_tags = autograd.Variable(src_boundary_tags.cuda())
+        src_words_seq = autograd.Variable(src_words_seq.cpu())
+        bert_words_mask = autograd.Variable(bert_words_mask.cpu())
+        src_words_mask = autograd.Variable(src_words_mask.cpu())
+        src_pos_tags = autograd.Variable(src_pos_tags.cpu())
+        src_chars_seq = autograd.Variable(src_chars_seq.cpu())
+        src_boundary_tags = autograd.Variable(src_boundary_tags.cpu())
 
         with torch.no_grad():
             if model_id == 1:
@@ -1291,13 +1291,13 @@ def train_model(model_id, train_samples, dev_samples, test_samples, best_model_f
     custom_print('Parameters size:', pytorch_total_params)
 
     custom_print(model)
-    if torch.cuda.is_available():
-        model.cuda()
+    if torch.cpu.is_available():
+        model.cpu()
     if n_gpu > 1:
         model = torch.nn.DataParallel(model)
 
     pointer_criterion = nn.NLLLoss(ignore_index=-1)
-    pos_weight = torch.ones([1]).cuda()
+    pos_weight = torch.ones([1]).cpu()
     pos_weight[0] = 3
     card_criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     # optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.00001)
@@ -1346,18 +1346,18 @@ def train_model(model_id, train_samples, dev_samples, test_samples, best_model_f
             arg2e = torch.from_numpy(cur_samples_input['arg2_end'].astype('long'))
             card_target = torch.from_numpy(cur_samples_input['cardinality_target'].astype('float32'))
 
-            src_words_seq = autograd.Variable(src_words_seq.cuda())
-            bert_words_mask = autograd.Variable(bert_words_mask.cuda())
-            src_words_mask = autograd.Variable(src_words_mask.cuda())
-            src_pos_tags = autograd.Variable(src_pos_tags.cuda())
-            src_chars_seq = autograd.Variable(src_chars_seq.cuda())
-            src_boundary_tags = autograd.Variable(src_boundary_tags.cuda())
+            src_words_seq = autograd.Variable(src_words_seq.cpu())
+            bert_words_mask = autograd.Variable(bert_words_mask.cpu())
+            src_words_mask = autograd.Variable(src_words_mask.cpu())
+            src_pos_tags = autograd.Variable(src_pos_tags.cpu())
+            src_chars_seq = autograd.Variable(src_chars_seq.cpu())
+            src_boundary_tags = autograd.Variable(src_boundary_tags.cpu())
 
-            arg1s = autograd.Variable(arg1s.cuda())
-            arg1e = autograd.Variable(arg1e.cuda())
-            arg2s = autograd.Variable(arg2s.cuda())
-            arg2e = autograd.Variable(arg2e.cuda())
-            card_target = autograd.Variable(card_target.cuda())
+            arg1s = autograd.Variable(arg1s.cpu())
+            arg1e = autograd.Variable(arg1e.cpu())
+            arg2s = autograd.Variable(arg2s.cpu())
+            arg2e = autograd.Variable(arg2e.cpu())
+            card_target = autograd.Variable(card_target.cpu())
             trg_seq_len = arg1s.size()[1]
             if model_id == 1:
                 outputs = model(src_words_seq, bert_words_mask, src_words_mask, src_pos_tags,
@@ -1512,7 +1512,7 @@ def write_fold_data(all_samples):
 
 
 if __name__ == "__main__":
-    # os.environ['CUDA_VISIBLE_DEVICES'] = sys.argv[1]
+    # os.environ['cpu_VISIBLE_DEVICES'] = sys.argv[1]
     dataset_name = sys.argv[1]
     config_file = sys.argv[2]
     trg_data_folder = sys.argv[3]
@@ -1566,7 +1566,7 @@ if __name__ == "__main__":
     sent_boundary_tag_dim = int(config[dataset_name]['sent_boundary_tag_dim'])
     metric = config[dataset_name]['metric']
 
-    n_gpu = torch.cuda.device_count()
+    n_gpu = torch.cpu.device_count()
     set_random_seeds(random_seed)
     if train_on_full_data:
         early_stop_cnt = 100
@@ -1628,8 +1628,8 @@ if __name__ == "__main__":
         train_model(model_name, train_data, dev_data, None, model_file_name) # Changed by SOHOM # Not passing test_data as we need to score on it, it is blind, we don't have the labels
         custom_print("\n\nPrediction......")
         best_model = get_model(model_name)
-        if torch.cuda.is_available():
-            best_model.cuda()
+        if torch.cpu.is_available():
+            best_model.cpu()
         if n_gpu > 1:
             best_model = torch.nn.DataParallel(best_model)
         best_model.load_state_dict(torch.load(model_file_name))
@@ -1692,8 +1692,8 @@ if __name__ == "__main__":
             train_model(model_name, train_data, dev_data, None, model_file_name)
             custom_print("\n\nPrediction......")
             best_model = get_model(model_name)
-            if torch.cuda.is_available():
-                best_model.cuda()
+            if torch.cpu.is_available():
+                best_model.cpu()
             if n_gpu > 1:
                 best_model = torch.nn.DataParallel(best_model)
             custom_print('loading model......')
