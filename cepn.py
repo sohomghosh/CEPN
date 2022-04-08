@@ -1643,7 +1643,7 @@ if __name__ == "__main__":
         test_preds = predict(test_data, best_model, model_name)
         #test_f1 = get_F1(test_data, test_preds) # Changed by SOHOM
         #write_test_res(test_data, test_preds, os.path.join(trg_data_folder, 'test_out.json')) # Changed by SOHOM
-        test_blind_df = pd.read_csv(os.path.join(trg_data_folder, test_file_csv), sep = ';', header =0) # Changed by SOHOM
+        test_blind_df = pd.read_csv(os.path.join(src_data_folder, test_file_csv), sep = ';', header =0) # Changed by SOHOM
         test_blind_df.columns = ['Index', 'Text'] # Changed by SOHOM
         id_to_sent = dict(zip([i.strip() for i in test_blind_df.Index], [j.strip() for j in test_blind_df.Text])) # Changed by SOHOM
         write_blind_res(test_data, id_to_sent, test_preds, os.path.join(trg_data_folder, 'test_out.json')) # Changed by SOHOM
