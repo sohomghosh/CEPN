@@ -129,11 +129,13 @@ def generate_train_json(in_file, out_file):
         try:    
             cstart = char_word_idx[cause_start]
         except:
+            cstart = len(sent[0:cause_start].split(' '))#word number of effect starting word
             print('index of error is:', parts[0], char_word_idx, "cause_start:", cause_start)
         cend = cstart + len(cause.split(' ')) - 1
         try:
-         estart = char_word_idx[effect_start]
+            estart = char_word_idx[effect_start]
         except:
+            estart = len(sent[0:effect_start].split(' '))#word number of effect starting word
             print('index of error is:', parts[0], char_word_idx, "effect_start:", effect_start)
         eend = estart + len(effect.split(' ')) - 1
 
