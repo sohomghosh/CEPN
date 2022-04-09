@@ -1534,7 +1534,7 @@ if __name__ == "__main__":
     if not os.path.exists(trg_data_folder):
         os.mkdir(trg_data_folder)
     model_name = 1
-    datasets = ['SemEval', 'FinCausal2021', 'FinCausal2020']
+    datasets = ['SemEval', 'FinCausal2021', 'FinCausal2020', 'FinCausal2022TillDate']
     gen_orders = ['CauseFirst', 'EffectFirst']
     assert dataset_name in datasets
     assert dataset_name in config.sections()
