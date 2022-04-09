@@ -128,7 +128,10 @@ def generate_train_json(in_file, out_file):
             char_idx += len(tok) + 1
         cstart = char_word_idx[cause_start]
         cend = cstart + len(cause.split(' ')) - 1
-        estart = char_word_idx[effect_start]
+        try:
+         estart = char_word_idx[effect_start]
+        except:
+            print('index of error is:', parts[0])
         eend = estart + len(effect.split(' ')) - 1
 
         new_cause = ' '.join(tokens[cstart:cend+1])
