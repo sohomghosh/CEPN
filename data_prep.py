@@ -115,8 +115,8 @@ def generate_train_json(in_file, out_file):
         sent = parts[1].strip()
         cause = parts[2].strip()
         effect = parts[3].strip()
-        cause_start = int(float(parts[6].strip()))
-        effect_start = int(float(parts[8].strip()))
+        cause_start = int(float(parts[4].strip())) # int(float(parts[6].strip())) # Changed by SOHOM
+        effect_start = int(float(parts[5].strip())) # int(float(parts[8].strip())) # Changed by SOHOM
 
         char_word_idx = OrderedDict()
         tokens = sent.split(' ')
