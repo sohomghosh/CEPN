@@ -126,26 +126,20 @@ def generate_train_json(in_file, out_file):
             char_word_idx[char_idx] = word_idx
             word_idx += 1
             char_idx += len(tok) + 1
-        try:    
+        try: # Changed by SOHOM
             cstart = char_word_idx[cause_start]
-        except:
-            cstart = len(sent[0:cause_start].split(' '))#word number of effect starting word
-            print('index of error is:', parts[0], char_word_idx, "cause_start:", cause_start)
-        cend = cstart + len(cause.split(' ')) - 1
-        try:
+            cend = cstart + len(cause.split(' ')) - 1
             estart = char_word_idx[effect_start]
-        except:
-            estart = len(sent[0:effect_start].split(' '))#word number of effect starting word
-            print('index of error is:', parts[0], char_word_idx, "effect_start:", effect_start)
-        eend = estart + len(effect.split(' ')) - 1
-
-        new_cause = ' '.join(tokens[cstart:cend+1])
-        new_effect = ' '.join(tokens[estart:eend+1])
-        if sent not in index_dct:
-            index_dct[sent] = [(cstart, cend, estart, eend, cause, effect, new_cause, new_effect)]
-        else:
-            index_dct[sent].append((cstart, cend, estart, eend, cause, effect, new_cause, new_effect))
-        cnt += 1
+            eend = estart + len(effect.split(' ')) - 1
+            new_cause = ' '.join(tokens[cstart:cend+1])
+            new_effect = ' '.join(tokens[estart:eend+1])
+            if sent not in index_dct:
+                index_dct[sent] = [(cstart, cend, estart, eend, cause, effect, new_cause, new_effect)]
+            else:
+                index_dct[sent].append((cstart, cend, estart, eend, cause, effect, new_cause, new_effect))
+            cnt += 1
+        except: # Changed by SOHOM
+             print('index of error is:', parts[0], char_word_idx, "effect_start:", effect_start, "cause_start:", cause_start) # Changed by SOHOM
 
     print(len(index_dct))
     print(cnt)
