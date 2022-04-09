@@ -11,7 +11,6 @@ from nltk.tokenize import sent_tokenize
 import argparse
 import random
 import pandas as pd
-import pyconll
 
 
 def generate_bert_json(in_file, out_file, bert_tokenizer_name):
@@ -112,7 +111,7 @@ def generate_train_json(in_file, out_file):
     cnt = 0
     for line in lines:
         line = line.strip()
-        parts = line.split(';') #SOHOM: To be changed to ',' for our piece
+        parts = line.split(';')
         sent = parts[1].strip()
         cause = parts[2].strip()
         effect = parts[3].strip()
