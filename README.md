@@ -1,49 +1,25 @@
-This repo contains the code and data for causality extraction task.
 
-### Requirements ###
-
-1) python 3.6
-2) pytorch 1.7.1
-3) CUDA 10.1
-4) Transformers 3.5.0
-
-### Dataset ###
-
-https://drive.google.com/drive/folders/1DGmljtCkvNY2PUzZH94G74agPNyMoKPi?usp=sharing
-
-5 fold splits for FinCausal2020 and FinCausal2021 is given in the above location. Use data_prep.py to convert them into the proper format for our code.
-
-python3.6 data_prep.py in_file_csv out_file_json out_bert_file_json bert_tokenizer_name
-
-in_file_csv: csv file in the splits
-
-out_file_json: intermediate non-beat json file
-
-out_bert_file_json: json file with BERT tokens. This file is used by cepn.py to train and test the model.
-
-bert_tokenizer_name: bert-base-cased or bert-large-cased
-
-### How to run ###
-
-CEPN_Base
-
-	python3.6 cepn.py FinCausal2020 config.ini target_dir train5fold
-
-	python3.6 cepn.py FinCausal2021 config.ini target_dir train5fold
-
-CEPN_Large
-
-	python3.6 cepn.py FinCausal2020 config_large.ini target_dir train5fold
-
-	python3.6 cepn.py FinCausal2021 config_large.ini target_dir train5fold
-
-target_dir: Some directory where model and other output files are saved.
 
 ### Publication ###
 
-If you use the source code or models from this work, please cite our paper:
+If you use the source code or models from this work, please cite the papers:
 
 ```
+@inproceedings{kao-etal-2020-ntunlpl,
+    title = "{NTUNLPL} at {F}in{C}ausal 2020, Task 2:Improving Causality Detection Using {V}iterbi Decoder",
+    author = "Kao, Pei-Wei  and
+      Chen, Chung-Chi  and
+      Huang, Hen-Hsen  and
+      Chen, Hsin-Hsi",
+    booktitle = "Proceedings of the 1st Joint Workshop on Financial Narrative Processing and MultiLing Financial Summarisation",
+    month = dec,
+    year = "2020",
+    address = "Barcelona, Spain (Online)",
+    publisher = "COLING",
+    url = "https://aclanthology.org/2020.fnp-1.11",
+    pages = "69--73",
+}
+
 @inproceedings{nayak2022cepn,
 	author    = {Tapas Nayak, Soumya Sharma, Yash Butala, Koustuv Dasgupta, Pawan Goyal, and Niloy Ganguly},
 	title     = {A Generative Approach for Financial Causality Extraction},
@@ -51,4 +27,20 @@ If you use the source code or models from this work, please cite our paper:
 	year      = {2022}
 
 }
+
+
+@inProceedings{ghosh-naskar:2022:FNP,
+  author    = {Ghosh, Sohom  and  Naskar, Sudip},
+  title     = {LIPI at FinCausal 2022: Mining Causes and Effects from Financial Texts},
+  booktitle      = {Proceedings of the The 4th Financial Narrative Processing Workshop @LREC2022},
+  month          = {June},
+  year           = {2022},
+  address        = {Marseille, France},
+  publisher      = {European Language Resources Association},
+  pages     = {130--132},
+  abstract  = {While reading financial documents, investors need to know the causes and their effects. This empowers them to make data-driven decisions. Thus, there is a need to develop an automated system for extracting causes and their effects from financial texts using Natural Language Processing. In this paper, we present the approach our team LIPI followed while participating in the FinCausal 2022 shared task. This approach is based on the winning solution of the first edition of FinCausal held in the year 2020.},
+  url       = {https://aclanthology.org/2022.fnp-1.21}
+}
+
+
 ```
