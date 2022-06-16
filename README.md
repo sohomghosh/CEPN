@@ -1,4 +1,5 @@
-
+This repository presents team LIPI coltion for FinCausal 2022.
+It has been forked from [this repository](https://github.com/nayakt/CEPN) and artifacts from [this repository](https://github.com/pxpxkao/FinCausal-2020) have been used.
 
 ### Publication ###
 
